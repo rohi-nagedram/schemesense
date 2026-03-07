@@ -187,24 +187,7 @@ let data=await response.json()
 
 displayResults(data)
 }
-function generateAIExplanation(age, income, state, schemes){
 
-let text = "Based on your profile, our AI analyzed your eligibility. "
-
-text += "Your age is " + age + ", "
-text += "your income is " + income + ", "
-text += "and your state is " + state + ". "
-
-text += "After checking government scheme conditions, "
-
-if(schemes.length > 0){
-text += "the most suitable scheme for you is " + schemes[0].scheme_name + ". "
-text += "This scheme matches your age and income requirements."
-}else{
-text += "no matching schemes were found for your eligibility."
-}
-
-return text
 
 }
 // ---------------- Display schemes ----------------
@@ -469,6 +452,24 @@ const data = await response.json()
 
 return data.candidates[0].content.parts[0].text
 }
+function generateAIExplanation(age, income, state, schemes){
+
+let text = "Based on your profile, our AI analyzed your eligibility. "
+
+text += "Your age is " + age + ", "
+text += "your income is " + income + ", "
+text += "and your state is " + state + ". "
+
+text += "After checking government scheme conditions, "
+
+if(schemes.length > 0){
+text += "the most suitable scheme for you is " + schemes[0].scheme_name + ". "
+text += "This scheme matches your age and income requirements."
+}else{
+text += "no matching schemes were found for your eligibility."
+}
+
+return text  
 
 </script></body>
 
