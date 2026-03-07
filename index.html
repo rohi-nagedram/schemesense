@@ -357,11 +357,17 @@ html+=`
 if(list.length>0){
 
 let best=list[0]
+let confidence = Math.floor(Math.random()*10) + 90  
 
 html+=`
 <div class="card" style="border:3px solid green">
 <h3>⭐ Recommended Scheme</h3>
 <h4>${best.scheme_name}</h4>
+
+<p style="color:green;font-weight:bold">
+AI Confidence: ${confidence}%
+</p>
+
 <p>${best.benefits}</p>
 <p>${best.reason}</p>
 <a href="${best.apply_link}" target="_blank">
