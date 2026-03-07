@@ -1,26 +1,16 @@
-
-
-
-
-
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
-<title>SchemeSense</title><style>
+
+<title>SchemeSense</title>
+
+<style>
 
 body{
 font-family:Arial;
 background:#f5f5f5;
 text-align:center;
 padding:40px;
-}
-
-h1{
-margin-bottom:20px;
-}
-
-select{
-padding:8px;
-margin-bottom:20px;
 }
 
 input{
@@ -49,54 +39,97 @@ border-radius:10px;
 box-shadow:0 3px 10px rgba(0,0,0,0.2);
 }
 
-</style></head><body><select id="language" onchange="changeLanguage()">
+#error{
+color:red;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<select id="language" onchange="resetPage()">
 <option value="en">English</option>
 <option value="te">Telugu</option>
 <option value="hi">Hindi</option>
-</select><h1 id="title">Find Government Schemes</h1><input id="age" placeholder="Enter Age"><br>
+</select>
+
+<h1 id="title">Find Government Schemes</h1>
+
+<div id="error"></div>
+
+<input id="age" placeholder="Enter Age"><br>
 <input id="income" placeholder="Enter Income"><br>
 <input id="state" placeholder="Enter State"><br>
 
 <button onclick="checkSchemes()">Check Eligibility</button>
 <button onclick="startVoice()">🎤 Speak Details</button>
 
-<div id="results"></div><script>
+<div id="results"></div>
+
+<script>
 
 const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/prod/check-eligibility"
 
 
+function resetPage(){
 
-async function checkSchemes(){
+document.getElementById("age").value=""
+document.getElementById("income").value=""
+document.getElementById("state").value=""
+document.getElementById("results").innerHTML=""
+document.getElementById("error").innerHTML=""
+
+}
+
+
+function validateInputs(){
 
 let age=document.getElementById("age").value
 let income=document.getElementById("income").value
 let state=document.getElementById("state").value
 
-if(!age || !income || !state){
-alert("Please enter Age, Income and State correctly")
-return
+if(!/^\d+$/.test(age)){
+showError("Age must be a number")
+return false
 }
 
-if(age<=0 || age>120){
-alert("Please enter a valid age")
-return
+if(!/^\d+$/.test(income)){
+showError("Income must be a number")
+return false
 }
 
-if(income<=0){
-alert("Please enter a valid income")
-return
+if(state.length<2){
+showError("Enter a valid state")
+return false
 }
+
+return true
+
+}
+
+
+function showError(msg){
+document.getElementById("error").innerText=msg
+}
+
+
+async function checkSchemes(){
+
+document.getElementById("error").innerHTML=""
+
+if(!validateInputs()) return
+
+let age=document.getElementById("age").value
+let income=document.getElementById("income").value
+let state=document.getElementById("state").value
 
 let response=await fetch(API_URL,{
 method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-age:Number(age),
-income:Number(income),
-state:state
-})
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({age:parseInt(age),income:parseInt(income),state:state})
 })
 
 let data=await response.json()
@@ -106,127 +139,77 @@ displayResults(data)
 }
 
 
+function displayResults(list){
 
-function displayResults(data){
+let html=""
 
-let container=document.getElementById("results")
-container.innerHTML=""
+list.forEach(s=>{
 
-data.forEach(function(s){
-
-container.innerHTML+=`
-
+html+=`
 <div class="card">
-
 <h3>${s.scheme_name}</h3>
-
 <p>${s.benefits}</p>
-
 <p>${s.reason}</p>
-
 <a href="${s.apply_link}" target="_blank">
 <button>Apply</button>
 </a>
-
 </div>
-
 `
 
 })
 
-}
+document.getElementById("results").innerHTML=html
 
+}
 
 
 function startVoice(){
 
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition
-
-if(!SpeechRecognition){
-alert("Voice not supported in this browser")
+if(!('webkitSpeechRecognition'in window)){
+alert("Speech recognition not supported")
 return
 }
 
-const recognition=new SpeechRecognition()
+const recognition=new webkitSpeechRecognition()
 
 recognition.lang="en-IN"
+recognition.start()
 
 recognition.onresult=function(event){
 
-let text=event.results[0][0].transcript.toLowerCase()
+let speech=event.results[0][0].transcript.toLowerCase()
 
-let lang=document.getElementById("language").value
-
-if(lang==="en"){
-
-let numbers=text.match(/\d+/g)
+let numbers=speech.match(/\d+/g)
 
 if(numbers && numbers.length>=2){
+
 document.getElementById("age").value=numbers[0]
 document.getElementById("income").value=numbers[1]
-}
 
 }
 
-if(text.includes("andhra") || text.includes("ఆంధ్ర")){
+if(speech.includes("andhra")){
 document.getElementById("state").value="Andhra Pradesh"
 }
 
-if(text.includes("telangana") || text.includes("తెలంగాణ")){
+if(speech.includes("telangana")){
 document.getElementById("state").value="Telangana"
 }
 
-}
-
-recognition.start()
-
-}
-
-
-
-const translations={
-
-en:{
-title:"Find Government Schemes",
-age:"Enter Age",
-income:"Enter Income",
-state:"Enter State"
-},
-
-te:{
-title:"ప్రభుత్వ పథకాలను కనుగొనండి",
-age:"వయస్సు నమోదు చేయండి",
-income:"ఆదాయం నమోదు చేయండి",
-state:"రాష్ట్రం నమోదు చేయండి"
-},
-
-hi:{
-title:"सरकारी योजनाएँ खोजें",
-age:"आयु दर्ज करें",
-income:"आय दर्ज करें",
-state:"राज्य दर्ज करें"
+if(speech.includes("tamil")){
+document.getElementById("state").value="Tamil Nadu"
 }
 
 }
 
-
-
-function changeLanguage(){
-
-let lang=document.getElementById("language").value
-
-document.getElementById("title").innerText=translations[lang].title
-document.getElementById("age").placeholder=translations[lang].age
-document.getElementById("income").placeholder=translations[lang].income
-document.getElementById("state").placeholder=translations[lang].state
-
-document.getElementById("age").value=""
-document.getElementById("income").value=""
-document.getElementById("state").value=""
-
-document.getElementById("results").innerHTML=""
-
 }
 
-</script></body>
+</script>
+
+</body>
 </html>
+
+
+
+
+
