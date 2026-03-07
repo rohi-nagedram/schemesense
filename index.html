@@ -100,7 +100,7 @@ Try saying:<br>
 // ---------------- API ----------------
 
 const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/prod/check-eligibility"
-
+let voiceMode = false
 
 // ---------------- Language dictionary ----------------
 
@@ -465,36 +465,35 @@ else if(lang==="hi") recognition.lang="hi-IN"
 else recognition.lang="en-IN"
 
 recognition.start()
-recognition.onresult=function(event){
+recognition.onresult = function(event){
+
+voiceMode = true
 
 let speech = event.results[0][0].transcript.toLowerCase()
 
 let nums = speech.match(/\d+/g)
 
-if(nums && nums.length>=2){
-document.getElementById("age").value = nums[0]
-document.getElementById("income").value = nums[1]
+if(nums){
+if(nums[0]) document.getElementById("age").value = nums[0]
+if(nums[1]) document.getElementById("income").value = nums[1]
 }
 
 if(speech.includes("andhra") || speech.includes("ఆంధ్ర") || speech.includes("आंध्र")){
-document.getElementById("state").value = "Andhra Pradesh"
+document.getElementById("state").value="Andhra Pradesh"
 }
 
 if(speech.includes("telangana") || speech.includes("తెలంగాణ") || speech.includes("तेलंगाना")){
-document.getElementById("state").value = "Telangana"
+document.getElementById("state").value="Telangana"
 }
 
-/* check if all fields filled */
+setTimeout(function(){
 
-let age = document.getElementById("age").value
-let income = document.getElementById("income").value
-let state = document.getElementById("state").value
-
-if(age !== "" && income !== "" && state !== ""){
-setTimeout(()=>{
+if(voiceMode){
 checkSchemes()
-},800)
+voiceMode = false
 }
+
+},1000)
 
 }
 
