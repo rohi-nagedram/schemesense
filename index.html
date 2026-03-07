@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <title>SchemeSense</title>
@@ -15,7 +16,7 @@ padding:40px;
 
 input{
 padding:10px;
-margin:10px;
+margin:5px;
 width:220px;
 font-size:16px;
 }
@@ -39,9 +40,10 @@ border-radius:10px;
 box-shadow:0 3px 10px rgba(0,0,0,0.2);
 }
 
-#error{
+.error{
 color:red;
-font-weight:bold;
+font-size:14px;
+height:16px;
 }
 
 </style>
@@ -50,7 +52,7 @@ font-weight:bold;
 
 <body>
 
-<select id="language" onchange="resetPage()">
+<select id="language" onchange="changeLanguage()">
 <option value="en">English</option>
 <option value="te">Telugu</option>
 <option value="hi">Hindi</option>
@@ -58,14 +60,23 @@ font-weight:bold;
 
 <h1 id="title">Find Government Schemes</h1>
 
-<div id="error"></div>
+<div>
+<input id="age" type="number" placeholder="Enter Age">
+<div id="ageError" class="error"></div>
+</div>
 
-<input id="age" placeholder="Enter Age"><br>
-<input id="income" placeholder="Enter Income"><br>
-<input id="state" placeholder="Enter State"><br>
+<div>
+<input id="income" type="number" placeholder="Enter Income">
+<div id="incomeError" class="error"></div>
+</div>
 
-<button onclick="checkSchemes()">Check Eligibility</button>
-<button onclick="startVoice()">🎤 Speak Details</button>
+<div>
+<input id="state" placeholder="Enter State">
+<div id="stateError" class="error"></div>
+</div>
+
+<button onclick="checkSchemes()" id="checkBtn">Check Eligibility</button>
+<button onclick="startVoice()" id="voiceBtn">🎤 Speak Details</button>
 
 <div id="results"></div>
 
@@ -74,62 +85,130 @@ font-weight:bold;
 const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/prod/check-eligibility"
 
 
-function resetPage(){
+const langText={
 
-document.getElementById("age").value=""
-document.getElementById("income").value=""
-document.getElementById("state").value=""
-document.getElementById("results").innerHTML=""
-document.getElementById("error").innerHTML=""
+en:{
+title:"Find Government Schemes",
+age:"Enter Age",
+income:"Enter Income",
+state:"Enter State",
+check:"Check Eligibility",
+voice:"Speak Details",
+ageError:"Enter valid age number",
+incomeError:"Enter valid income number",
+stateError:"State cannot contain numbers"
+},
+
+te:{
+title:"ప్రభుత్వ పథకాలు కనుగొనండి",
+age:"వయస్సు నమోదు చేయండి",
+income:"ఆదాయం నమోదు చేయండి",
+state:"రాష్ట్రం నమోదు చేయండి",
+check:"అర్హత తనిఖీ",
+voice:"మాట్లాడండి",
+ageError:"సరైన వయస్సు నమోదు చేయండి",
+incomeError:"సరైన ఆదాయం నమోదు చేయండి",
+stateError:"రాష్ట్రంలో సంఖ్యలు ఉండకూడదు"
+},
+
+hi:{
+title:"सरकारी योजनाएं खोजें",
+age:"आयु दर्ज करें",
+income:"आय दर्ज करें",
+state:"राज्य दर्ज करें",
+check:"योग्यता जांचें",
+voice:"बोलें",
+ageError:"सही आयु दर्ज करें",
+incomeError:"सही आय दर्ज करें",
+stateError:"राज्य में संख्या नहीं होनी चाहिए"
+}
 
 }
 
 
-function validateInputs(){
+function changeLanguage(){
+
+let lang=document.getElementById("language").value
+let t=langText[lang]
+
+document.getElementById("title").innerText=t.title
+document.getElementById("age").placeholder=t.age
+document.getElementById("income").placeholder=t.income
+document.getElementById("state").placeholder=t.state
+document.getElementById("checkBtn").innerText=t.check
+document.getElementById("voiceBtn").innerText="🎤 "+t.voice
+
+document.getElementById("age").value=""
+document.getElementById("income").value=""
+document.getElementById("state").value=""
+
+document.getElementById("results").innerHTML=""
+
+clearErrors()
+
+}
+
+
+function clearErrors(){
+
+document.getElementById("ageError").innerText=""
+document.getElementById("incomeError").innerText=""
+document.getElementById("stateError").innerText=""
+
+}
+
+
+function validate(){
+
+clearErrors()
+
+let lang=document.getElementById("language").value
+let t=langText[lang]
 
 let age=document.getElementById("age").value
 let income=document.getElementById("income").value
 let state=document.getElementById("state").value
 
-if(!/^\d+$/.test(age)){
-showError("Age must be a number")
-return false
-}
+let valid=true
 
-if(!/^\d+$/.test(income)){
-showError("Income must be a number")
-return false
-}
+if(!age || age<=0){
 
-if(state.length<2){
-showError("Enter a valid state")
-return false
-}
-
-return true
+document.getElementById("ageError").innerText=t.ageError
+valid=false
 
 }
 
+if(!income || income<=0){
 
-function showError(msg){
-document.getElementById("error").innerText=msg
+document.getElementById("incomeError").innerText=t.incomeError
+valid=false
+
+}
+
+if(/\d/.test(state)){
+
+document.getElementById("stateError").innerText=t.stateError
+valid=false
+
+}
+
+return valid
+
 }
 
 
 async function checkSchemes(){
 
-document.getElementById("error").innerHTML=""
+if(!validate()) return
 
-if(!validateInputs()) return
-
-let age=document.getElementById("age").value
-let income=document.getElementById("income").value
+let age=parseInt(document.getElementById("age").value)
+let income=parseInt(document.getElementById("income").value)
 let state=document.getElementById("state").value
 
 let response=await fetch(API_URL,{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({age:parseInt(age),income:parseInt(income),state:state})
+body:JSON.stringify({age:age,income:income,state:state})
 })
 
 let data=await response.json()
@@ -166,8 +245,10 @@ document.getElementById("results").innerHTML=html
 function startVoice(){
 
 if(!('webkitSpeechRecognition'in window)){
-alert("Speech recognition not supported")
+
+alert("Speech not supported")
 return
+
 }
 
 const recognition=new webkitSpeechRecognition()
@@ -179,26 +260,23 @@ recognition.onresult=function(event){
 
 let speech=event.results[0][0].transcript.toLowerCase()
 
-let numbers=speech.match(/\d+/g)
+let nums=speech.match(/\d+/g)
 
-if(numbers && numbers.length>=2){
+if(nums && nums.length>=2){
 
-document.getElementById("age").value=numbers[0]
-document.getElementById("income").value=numbers[1]
+document.getElementById("age").value=nums[0]
+document.getElementById("income").value=nums[1]
 
 }
 
-if(speech.includes("andhra")){
+if(speech.includes("andhra"))
 document.getElementById("state").value="Andhra Pradesh"
-}
 
-if(speech.includes("telangana")){
+if(speech.includes("telangana"))
 document.getElementById("state").value="Telangana"
-}
 
-if(speech.includes("tamil")){
+if(speech.includes("tamil"))
 document.getElementById("state").value="Tamil Nadu"
-}
 
 }
 
@@ -208,8 +286,6 @@ document.getElementById("state").value="Tamil Nadu"
 
 </body>
 </html>
-
-
 
 
 
