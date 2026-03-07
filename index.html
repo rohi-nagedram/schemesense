@@ -216,27 +216,41 @@ return valid
 
 
 // ---------------- Fetch schemes ----------------
-
 async function checkSchemes(){
 
-if(!validate()) return
+clearErrors()
+
+let ageInput = document.getElementById("age").value
+let incomeInput = document.getElementById("income").value
+let state = document.getElementById("state").value
+
+// clean numbers for manual typing like "50,000" or "45 years"
+let age = ageInput.replace(/\D/g,'')
+let income = incomeInput.replace(/\D/g,'')
+
+if(age === "" || income === "" || state === ""){
+alert("Please fill age, income and state")
+return
+}
+
+age = parseInt(age)
+income = parseInt(income)
+
 document.getElementById("results").innerHTML =
 "<div class='card'>🔎 Checking eligibility...</div>"
-let age=parseInt(document.getElementById("age").value)
-let income=parseInt(document.getElementById("income").value)
-let state=document.getElementById("state").value
 
-let response=await fetch(API_URL,{
+let response = await fetch(API_URL,{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({age:age,income:income,state:state})
 })
 
-let data=await response.json()
+let data = await response.json()
 
 displayResults(data)
 
 }
+
 
 
 // ---------------- Display schemes ----------------
