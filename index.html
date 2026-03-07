@@ -287,8 +287,29 @@ document.getElementById("results").innerHTML=html
 
 if(list.length>0){
 
-let summary="You qualify for "+list.length+" schemes. "
+let lang=document.getElementById("language").value
+let summary=""
+
+if(lang==="te"){
+
+summary="మీకు మొత్తం "+list.length+" పథకాలకు అర్హత ఉంది. "
+summary+="మీకు సరైన పథకం "+list[0].scheme_name
+
+}
+
+else if(lang==="hi"){
+
+summary="आप "+list.length+" योजनाओं के लिए पात्र हैं। "
+summary+="आपके लिए सबसे अच्छी योजना "+list[0].scheme_name
+
+}
+
+else{
+
+summary="You qualify for "+list.length+" schemes. "
 summary+="The best scheme for you is "+list[0].scheme_name
+
+}
 
 speakText(summary)
 
@@ -456,9 +477,11 @@ function speakText(text){
 const speech=new SpeechSynthesisUtterance()
 
 speech.text=text
-speech.lang=document.getElementById("language").value
+let lang=document.getElementById("language").value
 
-window.speechSynthesis.speak(speech)
+if(lang==="te") speech.lang="te-IN"
+else if(lang==="hi") speech.lang="hi-IN"
+else speech.lang="en-IN"
 
 }
 
