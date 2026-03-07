@@ -1,3 +1,4 @@
+
 <!DOCTYPE html><html>
 <head>
 <title>SchemeSense</title><style>
@@ -10,7 +11,7 @@ padding:40px;
 }
 
 h1{
-margin-bottom:30px;
+margin-bottom:20px;
 }
 
 input{
@@ -30,6 +31,11 @@ cursor:pointer;
 margin:5px;
 }
 
+select{
+padding:8px;
+margin-bottom:20px;
+}
+
 .card{
 background:white;
 margin:20px auto;
@@ -39,7 +45,11 @@ border-radius:10px;
 box-shadow:0 3px 10px rgba(0,0,0,0.2);
 }
 
-</style></head><body><h1>Find Government Schemes</h1><input id="age" placeholder="Enter Age"><br>
+</style></head><body><select id="language" onchange="changeLanguage()">
+<option value="en">English</option>
+<option value="te">Telugu</option>
+<option value="hi">Hindi</option>
+</select><h1 id="title">Find Government Schemes</h1><input id="age" placeholder="Enter Age"><br>
 <input id="income" placeholder="Enter Income"><br>
 <input id="state" placeholder="Enter State"><br>
 
@@ -49,6 +59,7 @@ box-shadow:0 3px 10px rgba(0,0,0,0.2);
 <div id="results"></div><script>
 
 const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/prod/check-eligibility"
+
 
 
 async function checkSchemes(){
@@ -74,6 +85,7 @@ let data=await response.json()
 displayResults(data)
 
 }
+
 
 
 function displayResults(data){
@@ -109,7 +121,7 @@ container.innerHTML+=`
 
 function startVoice(){
 
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition
 
 if(!SpeechRecognition){
 alert("Voice not supported in this browser")
@@ -124,15 +136,13 @@ recognition.onresult=function(event){
 
 let text=event.results[0][0].transcript.toLowerCase()
 
-let ageMatch=text.match(/\d+/)
-let incomeMatch=text.match(/\d{4,}/)
+let numbers=text.match(/\d+/g)
 
-if(ageMatch){
-document.getElementById("age").value=ageMatch[0]
-}
+if(numbers && numbers.length>=2){
 
-if(incomeMatch){
-document.getElementById("income").value=incomeMatch[0]
+document.getElementById("age").value=numbers[0]
+document.getElementById("income").value=numbers[1]
+
 }
 
 if(text.includes("andhra")){
@@ -145,11 +155,50 @@ document.getElementById("state").value="Telangana"
 
 }
 
-recognition.onerror=function(){
-alert("Voice recognition error")
+recognition.start()
+
 }
 
-recognition.start()
+
+
+const translations={
+
+en:{
+title:"Find Government Schemes",
+age:"Enter Age",
+income:"Enter Income",
+state:"Enter State"
+},
+
+te:{
+title:"ప్రభుత్వ పథకాలను కనుగొనండి",
+age:"వయస్సు నమోదు చేయండి",
+income:"ఆదాయం నమోదు చేయండి",
+state:"రాష్ట్రం నమోదు చేయండి"
+},
+
+hi:{
+title:"सरकारी योजनाएँ खोजें",
+age:"आयु दर्ज करें",
+income:"आय दर्ज करें",
+state:"राज्य दर्ज करें"
+}
+
+}
+
+
+
+function changeLanguage(){
+
+let lang=document.getElementById("language").value
+
+document.getElementById("title").innerText=translations[lang].title
+
+document.getElementById("age").placeholder=translations[lang].age
+
+document.getElementById("income").placeholder=translations[lang].income
+
+document.getElementById("state").placeholder=translations[lang].state
 
 }
 
