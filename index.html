@@ -200,7 +200,26 @@ function displayResults(list){
 
   let html=""
 
-  list.forEach(s=>{
+  if(list.length>0){
+
+    // Recommended scheme
+    let best = list[0]
+
+    html += `
+    <div class="card" style="border:3px solid green">
+      <h3>⭐ Recommended Scheme</h3>
+      <h4>${best.scheme_name}</h4>
+      <p>${best.benefits}</p>
+      <p>${best.reason}</p>
+      <a href="${best.apply_link}" target="_blank">
+        <button>Apply</button>
+      </a>
+    </div>
+    `
+  }
+
+  // Remaining schemes
+  list.slice(1).forEach(s=>{
     html+=`
     <div class="card">
       <h3>${s.scheme_name}</h3>
@@ -215,12 +234,11 @@ function displayResults(list){
 
   document.getElementById("results").innerHTML=html
 
-  // AI voice summary
+  // AI voice explanation
   if(list.length>0){
 
     let summary = "You qualify for " + list.length + " schemes. "
-
-    summary += "The best scheme is " + list[0].scheme_name
+    summary += "The best scheme for you is " + list[0].scheme_name
 
     speakText(summary)
 
