@@ -67,6 +67,7 @@ button{
 </select>
 
 <h1 id="title">Find Government Schemes</h1>
+<div>
 <input id="age" placeholder="Enter Age" oninput="monitorInputs()">
 <div id="ageError" class="error"></div>
 </div>
@@ -114,9 +115,20 @@ button{
 <option value="Andaman and Nicobar Islands">
 <option value="Dadra and Nagar Haveli and Daman and Diu">
 </datalist>
-<div id="ageError" class="error"></div>
-</div>
 <div>
+<input id="state" list="statesList" placeholder="Enter State" oninput="monitorInputs()">
+
+<datalist id="statesList">
+<option value="Andhra Pradesh">
+<option value="Telangana">
+<option value="Tamil Nadu">
+<option value="Karnataka">
+<option value="Kerala">
+</datalist>
+
+<div id="stateError" class="error"></div>
+</div>
+
 
 
 
@@ -136,7 +148,7 @@ Try saying:<br>
 <script>
 
 // ---------------- API ----------------
-const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/plrod/check-eligibility"
+const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/prod/check-eligibility"
 
 let voiceMode = false
 
@@ -230,7 +242,10 @@ document.getElementById("incomeError").innerText=""
 document.getElementById("stateError").innerText=""
 
 }
-function validate(){
+  
+async function checkSchemes(){
+
+if(!validate()) return
 
 clearErrors()
 
