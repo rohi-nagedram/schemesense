@@ -1,513 +1,271 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
+
 <head>
-<title>SchemeSense – AI Government Scheme Finder</title><style>
+<title>SchemeSense – AI Government Scheme Finder</title>
+
+<style>
+
 body{
-  font-family: Arial, sans-serif;
-  background:#f5f5f5;
-  text-align:center;
-  padding:40px;
-}
-
-h1{
-  margin-bottom:10px;
-}
-
-select{
-  padding:8px;
-  margin-bottom:20px;
+font-family:Arial;
+background:#f5f5f5;
+text-align:center;
+padding:40px;
 }
 
 input{
-  padding:10px;
-  margin:6px;
-  width:240px;
-  font-size:16px;
+padding:10px;
+margin:6px;
+width:240px;
 }
 
 button{
-  padding:10px 20px;
-  background:#f39c12;
-  border:none;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-  margin:6px;
-  border-radius:6px;
+padding:10px 20px;
+background:#f39c12;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+margin:6px;
 }
 
 .card{
-  background:white;
-  margin:18px auto;
-  padding:18px;
-  width:340px;
-  border-radius:10px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.2);
+background:white;
+padding:18px;
+margin:18px auto;
+width:340px;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.2);
 }
 
 .error{
-  color:red;
-  font-size:13px;
-  height:16px;
+color:red;
+font-size:13px;
+height:16px;
 }
 
-</style></head><body><select id="language" onchange="changeLanguage()">
-  <option value="en">English</option>
-  <option value="te">Telugu</option>
-  <option value="hi">Hindi</option>
-</select><h1 id="title">Find Government Schemes</h1><div>
-  <input id="age" placeholder="Enter Age" oninput="monitorInputs()">
-  <div id="ageError" class="error"></div>
-</div><div>
-  <input id="income" placeholder="Enter Income" oninput="monitorInputs()">
-  <div id="incomeError" class="error"></div>
-</div><div>
-  <input id="state" placeholder="Enter State" oninput="monitorInputs()">
-  <div id="stateError" class="error"></div>
-</div><button onclick="checkSchemes()" id="checkBtn">Check Eligibility</button>
-<button onclick="startVoice()" id="voiceBtn">🎤 Speak Details</button>
+</style>
 
-<div id="results"></div><script>
+</head>
 
-// ---------------- API ----------------
+<body>
+
+<h1>Find Government Schemes</h1>
+
+<input id="age" placeholder="Enter Age">
+<div id="ageError" class="error"></div>
+
+<input id="income" placeholder="Enter Income">
+<div id="incomeError" class="error"></div>
+
+<input id="state" placeholder="Enter State">
+<div id="stateError" class="error"></div>
+
+<br>
+
+<button onclick="checkSchemes()">Check Eligibility</button>
+<button onclick="startVoice()">🎤 Speak Details</button>
+
+<div id="results"></div>
+
+<script>
 
 const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/prod/check-eligibility"
 
-// ---------------- Language dictionary ----------------
-const translations={
-  en:{
-    title:"Find Government Schemes",
-    age:"Enter Age",
-    income:"Enter Income",
-    state:"Enter State",
-    check:"Check Eligibility",
-    speak:"Speak Details",
-    ageError:"Enter valid age number",
-    incomeError:"Enter valid income number",
-    stateError:"State cannot contain numbers"
-  },
-
-  te:{
-    title:"ప్రభుత్వ పథకాలు కనుగొనండి",
-    age:"వయస్సు నమోదు చేయండి",
-    income:"ఆదాయం నమోదు చేయండి",
-    state:"రాష్ట్రం నమోదు చేయండి",
-    check:"అర్హత తనిఖీ",
-    speak:"మాట్లాడండి",
-    ageError:"సరైన వయస్సు నమోదు చేయండి",
-    incomeError:"సరైన ఆదాయం నమోదు చేయండి",
-    stateError:"రాష్ట్రంలో సంఖ్యలు ఉండకూడదు"
-  },
-
-  hi:{
-    title:"सरकारी योजनाएँ खोजें",
-    age:"आयु दर्ज करें",
-    income:"आय दर्ज करें",
-    state:"राज्य दर्ज करें",
-    check:"योग्यता जांचें",
-    speak:"बोलें",
-    ageError:"सही आयु दर्ज करें",
-    incomeError:"सही आय दर्ज करें",
-    stateError:"राज्य में संख्या नहीं होनी चाहिए"
-  }
-}
-
-// ---------------- Language change ----------------
-
-function changeLanguage(){
-
-  let lang=document.getElementById("language").value
-  let t=translations[lang]
-
-  document.getElementById("title").innerText=t.title
-  document.getElementById("age").placeholder=t.age
-  document.getElementById("income").placeholder=t.income
-  document.getElementById("state").placeholder=t.state
-
-  document.getElementById("checkBtn").innerText=t.check
-  document.getElementById("voiceBtn").innerText="🎤 "+t.speak
-
-  document.getElementById("age").value=""
-  document.getElementById("income").value=""
-  document.getElementById("state").value=""
-
-  document.getElementById("results").innerHTML=""
-
-  clearErrors()
-}
-// ---------------- Validation ----------------
-
-function clearErrors(){
-  document.getElementById("ageError").innerText=""
-  document.getElementById("incomeError").innerText=""
-  document.getElementById("stateError").innerText=""
-}
-
 function validate(){
 
-  clearErrors()
+let age=document.getElementById("age").value
+let income=document.getElementById("income").value
+let state=document.getElementById("state").value
 
-  let lang=document.getElementById("language").value
-  let t=translations[lang]
+let valid=true
 
-  let age=document.getElementById("age").value
-  let income=document.getElementById("income").value
-  let state=document.getElementById("state").value
-
-  let valid=true
-
-  if(!/^\d+$/.test(age)){
-    document.getElementById("ageError").innerText=t.ageError
-    valid=false
-  }
-
-  if(!/^\d+$/.test(income)){
-    document.getElementById("incomeError").innerText=t.incomeError
-    valid=false
-  }
-
-  if(/\d/.test(state)){
-    document.getElementById("stateError").innerText=t.stateError
-    valid=false
-  }
-
-  return valid
+if(!/^\d+$/.test(age)){
+document.getElementById("ageError").innerText="Enter valid age"
+valid=false
+}else{
+document.getElementById("ageError").innerText=""
 }
 
-// ---------------- Fetch schemes ----------------
+if(!/^\d+$/.test(income)){
+document.getElementById("incomeError").innerText="Enter valid income"
+valid=false
+}else{
+document.getElementById("incomeError").innerText=""
+}
+
+if(/\d/.test(state)){
+document.getElementById("stateError").innerText="State cannot contain numbers"
+valid=false
+}else{
+document.getElementById("stateError").innerText=""
+}
+
+return valid
+
+}
 
 async function checkSchemes(){
 
-  if(!validate()) return
+if(!validate()) return
 
-  let age=parseInt(document.getElementById("age").value)
-  let income=parseInt(document.getElementById("income").value)
-  let state=document.getElementById("state").value
+let age=parseInt(document.getElementById("age").value)
+let income=parseInt(document.getElementById("income").value)
+let state=document.getElementById("state").value
 
-  let response=await fetch(API_URL,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({age:age,income:income,state:state})
-  })
+let response=await fetch(API_URL,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({age:age,income:income,state:state})
+})
 
-  let data=await response.json()
+let data=await response.json()
 
-  displayResults(data)
+displayResults(data)
+
 }
-function generateAIExplanation(age, income, state, schemes){
 
-let text = "Based on your profile, our AI analyzed your eligibility. "
+function generateAIExplanation(age,income,state,schemes){
 
-text += "Your age is " + age + ", "
-text += "your income is " + income + ", "
-text += "and your state is " + state + ". "
+let text="Based on your profile our AI analyzed your eligibility. "
 
-text += "After checking government scheme conditions, "
+text+="Your age is "+age+", your income is "+income+", and your state is "+state+". "
 
-if(schemes.length > 0){
-text += "the most suitable scheme for you is " + schemes[0].scheme_name + ". "
-text += "This scheme matches your age and income requirements."
+if(schemes.length>0){
+
+text+="The most suitable scheme for you is "+schemes[0].scheme_name+". "
+
+text+="This scheme matches your eligibility conditions."
+
 }else{
-text += "no matching schemes were found for your eligibility."
+
+text+="Currently no matching schemes were found."
+
 }
 
 return text
 
 }
-// ---------------- Display schemes ----------------
-// ---------------- Display schemes + GenAI + Voice ----------------
-// ----- Gen AI explanation -----
-let aiText = ""
-try{
 
-const response = await fetch(
-"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=API_KEY",
-{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({
-contents:[
-{
-parts:[{text:prompt}]
-}
-]
-})
-}
-)
+function displayResults(list){
 
-const data = await response.json()
+let html=""
 
-if(data.candidates && data.candidates.length>0){
-aiText = data.candidates[0].content.parts[0].text
-}else{
-aiText = "AI generated recommendation based on your eligibility."
-}
+let age=document.getElementById("age").value
+let income=document.getElementById("income").value
+let state=document.getElementById("state").value
 
-}catch(err){
+let aiText=generateAIExplanation(age,income,state,list)
 
-aiText = "AI generated recommendation based on your eligibility."
+html+=`
+<div class="card" style="border:3px solid purple">
+<h3>🤖 AI Recommendation</h3>
+<p>${aiText}</p>
+</div>
+`
 
-}
+if(list.length>0){
 
-  // ----- AI Recommendation card -----
-  html += `
-  <div class="card" style="border:3px solid purple">
-  <h3>🤖 AI Recommendation</h3>
-  <p>${aiText}</p>
-  </div>
-  `
+let best=list[0]
 
-  // ----- Recommended scheme -----
-  if(list.length>0){
-
-    let best = list[0]
-
-    html += `
-    <div class="card" style="border:3px solid green">
-      <h3>⭐ Recommended Scheme</h3>
-      <h4>${best.scheme_name}</h4>
-      <p>${best.benefits}</p>
-      <p>${best.reason}</p>
-      <a href="${best.apply_link}" target="_blank">
-        <button>Apply</button>
-      </a>
-    </div>
-    `
-  }
-
-  // ----- Remaining schemes -----
-  list.slice(1).forEach(s=>{
-    html+=`
-    <div class="card">
-      <h3>${s.scheme_name}</h3>
-      <p>${s.benefits}</p>
-      <p>${s.reason}</p>
-      <a href="${s.apply_link}" target="_blank">
-        <button>Apply</button>
-      </a>
-    </div>
-    `
-  })
-
-  document.getElementById("results").innerHTML=html
-
-  // ----- Voice explanation -----
-  if(list.length>0){
-
-    let summary = "You qualify for " + list.length + " schemes. "
-    summary += "The best scheme for you is " + list[0].scheme_name
-
-    speakText(summary)
-
-  }
+html+=`
+<div class="card" style="border:3px solid green">
+<h3>⭐ Recommended Scheme</h3>
+<h4>${best.scheme_name}</h4>
+<p>${best.benefits}</p>
+<p>${best.reason}</p>
+<a href="${best.apply_link}" target="_blank">
+<button>Apply</button>
+</a>
+</div>
+`
 
 }
-// ---------------- Clear results if inputs empty ----------------
 
-function monitorInputs(){
+list.slice(1).forEach(s=>{
 
-  let age=document.getElementById("age").value
-  let income=document.getElementById("income").value
-  let state=document.getElementById("state").value
-
-  if(age=="" && income=="" && state==""){
-    document.getElementById("results").innerHTML=""
-  }
-}
-
-// ---------------- Telugu numbers ----------------
-
-function teluguNumberToDigit(text){
-
-const map = {
-"సున్నా":0,
-"ఒకటి":1,
-"రెండు":2,
-"మూడు":3,
-"నాలుగు":4,
-"ఐదు":5,
-"ఆరు":6,
-"ఏడు":7,
-"ఎనిమిది":8,
-"తొమ్మిది":9,
-"పది":10,
-"ఇరవై":20,
-"ముప్పై":30,
-"నలభై":40,
-"యాభై":50,
-"అరవై":60,
-"డెబ్బై":70,
-"ఎనభై":80,
-"తొంభై":90
-}
-
-let words = text.split(" ")
-let total = 0
-
-words.forEach(w => {
-
-if(map[w] !== undefined){
-total += map[w]
-}
-
-if(w === "వేల" || w === "వెయ్యి"){
-total = total * 1000
-}
-
-if(w === "లక్ష"){
-total = total * 100000
-}
+html+=`
+<div class="card">
+<h3>${s.scheme_name}</h3>
+<p>${s.benefits}</p>
+<p>${s.reason}</p>
+<a href="${s.apply_link}" target="_blank">
+<button>Apply</button>
+</a>
+</div>
+`
 
 })
 
-return total
-}
-// ---------------- Hindi numbers ----------------
+document.getElementById("results").innerHTML=html
 
-function hindiNumberToDigit(text){
+if(list.length>0){
 
-const map = {
+let summary="You qualify for "+list.length+" schemes. "
 
-"ek":1,
-"do":2,
-"teen":3,
-"char":4,
-"paanch":5,
-"chhe":6,
-"saat":7,
-"aath":8,
-"nau":9,
-"das":10,
+summary+="The best scheme for you is "+list[0].scheme_name
 
-"bees":20,
-"pachis":25,
-"tees":30,
-"paintis":35,
-"chalis":40,
-"paintalis":45,
-"pachaas":50
+speakText(summary)
 
 }
 
-let words = text.split(" ")
-let total = 0
-
-words.forEach(w => {
-
-if(map[w] !== undefined){
-total += map[w]
 }
-
-if(w === "hazaar"){
-total = total * 1000
-}
-
-if(w === "lakh"){
-total = total * 100000
-}
-
-})
-
-return total
-}
-// ---------------- Voice input ----------------
 
 function startVoice(){
 
 if(!('webkitSpeechRecognition' in window)){
-  alert("Speech recognition not supported")
-  return
+alert("Speech recognition not supported")
+return
 }
 
 const recognition=new webkitSpeechRecognition()
 
-let lang=document.getElementById("language").value
-
-if(lang==="te") recognition.lang="te-IN"
-else if(lang==="hi") recognition.lang="hi-IN"
-else recognition.lang="en-IN"
+recognition.lang="en-IN"
 
 recognition.start()
 
 recognition.onresult=function(event){
 
-let speech=event.results[0][0].transcript.toLowerCase()
+let speech=event.results[0][0].transcript
 
 let nums=speech.match(/\d+/g)
 
 if(nums && nums.length>=2){
-  document.getElementById("age").value=nums[0]
-  document.getElementById("income").value=nums[1]
-}else{
 
-  let teluguNum=teluguNumberToDigit(speech)
-  let hindiNum=hindiNumberToDigit(speech)
+document.getElementById("age").value=nums[0]
+document.getElementById("income").value=nums[1]
 
-  if(teluguNum>0) document.getElementById("age").value=teluguNum
-  if(hindiNum>0) document.getElementById("age").value=hindiNum
 }
 
-// state detection
-if(speech.includes("andhra") || speech.includes("ఆంధ్ర") || speech.includes("आंध्र")){
-  document.getElementById("state").value="Andhra Pradesh"
+if(speech.toLowerCase().includes("andhra")){
+document.getElementById("state").value="Andhra Pradesh"
 }
 
-if(speech.includes("telangana") || speech.includes("తెలంగాణ") || speech.includes("तेलंगाना")){
-  document.getElementById("state").value="Telangana"
+if(speech.toLowerCase().includes("telangana")){
+document.getElementById("state").value="Telangana"
 }
 
 }
 
 }
+
 function speakText(text){
 
-const speech = new SpeechSynthesisUtterance()
+const speech=new SpeechSynthesisUtterance()
 
-speech.text = text
-speech.lang = document.getElementById("language").value
+speech.text=text
+
+speech.lang="en-IN"
 
 window.speechSynthesis.speak(speech)
 
 }
-async function getAIExplanation(age, income, state, schemes){
 
-const schemeNames = schemes.map(s=>s.scheme_name).join(", ")
+</script>
 
-const prompt = `
-User profile:
-Age: ${age}
-Income: ${income}
-State: ${state}
-
-Eligible schemes: ${schemeNames}
-
-Explain which scheme is best and why in simple language.
-`
-
-const response = await fetch(
-"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyC5_2UN0grfmGBkNZMBuoCJtpjXNhxCwo4",
-{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify({
-contents:[
-{
-parts:[{text:prompt}]
-}
-]
-})
-}
-)
-
-const data = await response.json()
-
-return data.candidates[0].content.parts[0].text
-}  
-
-</script></body>
+</body>
 </html>
 
 
 
-
-
-
+    
