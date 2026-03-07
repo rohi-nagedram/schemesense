@@ -1,4 +1,8 @@
 
+
+
+
+
 <!DOCTYPE html><html>
 <head>
 <title>SchemeSense</title><style>
@@ -11,6 +15,11 @@ padding:40px;
 }
 
 h1{
+margin-bottom:20px;
+}
+
+select{
+padding:8px;
 margin-bottom:20px;
 }
 
@@ -29,11 +38,6 @@ color:white;
 font-size:16px;
 cursor:pointer;
 margin:5px;
-}
-
-select{
-padding:8px;
-margin-bottom:20px;
 }
 
 .card{
@@ -67,6 +71,21 @@ async function checkSchemes(){
 let age=document.getElementById("age").value
 let income=document.getElementById("income").value
 let state=document.getElementById("state").value
+
+if(!age || !income || !state){
+alert("Please enter Age, Income and State correctly")
+return
+}
+
+if(age<=0 || age>120){
+alert("Please enter a valid age")
+return
+}
+
+if(income<=0){
+alert("Please enter a valid income")
+return
+}
 
 let response=await fetch(API_URL,{
 method:"POST",
@@ -136,20 +155,24 @@ recognition.onresult=function(event){
 
 let text=event.results[0][0].transcript.toLowerCase()
 
+let lang=document.getElementById("language").value
+
+if(lang==="en"){
+
 let numbers=text.match(/\d+/g)
 
 if(numbers && numbers.length>=2){
-
 document.getElementById("age").value=numbers[0]
 document.getElementById("income").value=numbers[1]
+}
 
 }
 
-if(text.includes("andhra")){
+if(text.includes("andhra") || text.includes("ఆంధ్ర")){
 document.getElementById("state").value="Andhra Pradesh"
 }
 
-if(text.includes("telangana")){
+if(text.includes("telangana") || text.includes("తెలంగాణ")){
 document.getElementById("state").value="Telangana"
 }
 
@@ -193,12 +216,15 @@ function changeLanguage(){
 let lang=document.getElementById("language").value
 
 document.getElementById("title").innerText=translations[lang].title
-
 document.getElementById("age").placeholder=translations[lang].age
-
 document.getElementById("income").placeholder=translations[lang].income
-
 document.getElementById("state").placeholder=translations[lang].state
+
+document.getElementById("age").value=""
+document.getElementById("income").value=""
+document.getElementById("state").value=""
+
+document.getElementById("results").innerHTML=""
 
 }
 
