@@ -482,7 +482,7 @@ let lang=document.getElementById("language").value
 if(lang==="te") speech.lang="te-IN"
 else if(lang==="hi") speech.lang="hi-IN"
 else speech.lang="en-IN"
-
+window.speechSynthesis.speak(speech)
 }
 
 
