@@ -224,30 +224,44 @@ let ageInput = document.getElementById("age").value
 let incomeInput = document.getElementById("income").value
 let state = document.getElementById("state").value
 
-// clean numbers for manual typing like "50,000" or "45 years"
+// remove non-numeric characters (for manual typing like 50,000 or 45 years)
 let age = ageInput.replace(/\D/g,'')
 let income = incomeInput.replace(/\D/g,'')
 
 if(age === "" || income === "" || state === ""){
-alert("Please fill age, income and state")
+alert("Please fill Age, Income and State")
 return
 }
 
 age = parseInt(age)
 income = parseInt(income)
 
+// loading message
 document.getElementById("results").innerHTML =
 "<div class='card'>🔎 Checking eligibility...</div>"
+
+try{
 
 let response = await fetch(API_URL,{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({age:age,income:income,state:state})
+body:JSON.stringify({
+age:age,
+income:income,
+state:state
+})
 })
 
 let data = await response.json()
 
 displayResults(data)
+
+}catch(err){
+
+document.getElementById("results").innerHTML =
+"<div class='card'>Error calling API</div>"
+
+}
 
 }
 
