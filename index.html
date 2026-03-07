@@ -67,7 +67,13 @@ button{
 </select>
 
 <h1 id="title">Find Government Schemes</h1>
-
+<input id="age" placeholder="Enter Age" oninput="monitorInputs()">
+<div id="ageError" class="error"></div>
+</div>
+<div>
+<input id="income" placeholder="Enter Income" oninput="monitorInputs()">
+<div id="incomeError" class="error"></div>
+</div>  
 <div>
 <input id="state" list="statesList" placeholder="Enter State" oninput="monitorInputs()">
 <datalist id="statesList">
@@ -110,11 +116,8 @@ button{
 </datalist>
 <div id="ageError" class="error"></div>
 </div>
-
 <div>
-<input id="income" placeholder="Enter Income" oninput="monitorInputs()">
-<div id="incomeError" class="error"></div>
-</div>
+
 
 
 
@@ -133,7 +136,7 @@ Try saying:<br>
 <script>
 
 // ---------------- API ----------------
-const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/prod/check-eligibility"
+const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/plrod/check-eligibility"
 
 let voiceMode = false
 
