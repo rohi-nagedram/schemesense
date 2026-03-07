@@ -214,6 +214,18 @@ function displayResults(list){
   })
 
   document.getElementById("results").innerHTML=html
+
+  // AI voice summary
+  if(list.length>0){
+
+    let summary = "You qualify for " + list.length + " schemes. "
+
+    summary += "The best scheme is " + list[0].scheme_name
+
+    speakText(summary)
+
+  }
+
 }
 
 // ---------------- Clear results if inputs empty ----------------
@@ -373,7 +385,16 @@ if(speech.includes("telangana") || speech.includes("తెలంగాణ") || s
 }
 
 }
+function speakText(text){
 
+const speech = new SpeechSynthesisUtterance()
+
+speech.text = text
+speech.lang = document.getElementById("language").value
+
+window.speechSynthesis.speak(speech)
+
+}
 </script></body>
 </html>
 
