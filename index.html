@@ -284,9 +284,20 @@ let state = document.getElementById("state").value
 let age = ageInput.replace(/\D/g,'')
 let income = incomeInput.replace(/\D/g,'')
 
-if(age === "" || income === "" || state === ""){
-alert("Please fill Age, Income and State")
+if(age === ""){
+document.getElementById("ageError").innerText="Enter valid age"
 return
+}
+
+if(income === ""){
+document.getElementById("incomeError").innerText="Enter valid income"
+return
+}
+
+if(state === ""){
+document.getElementById("stateError").innerText="Enter state"
+return
+}
 }
 
 age = parseInt(age)
