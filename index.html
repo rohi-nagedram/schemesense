@@ -86,6 +86,13 @@ button{
 <button onclick="checkSchemes()" id="checkBtn">Check Eligibility</button>
 <button onclick="startVoice()" id="voiceBtn">🎤 Speak Details</button>
 
+<p style="font-size:13px;color:gray">
+Try saying:<br>
+"My age 45 income 50000 Telangana"<br>
+"నా వయస్సు నలభై ఐదు ఆదాయం యాభై వేల తెలంగాణ"<br>
+"Meri umar paintalis hai meri aay pachaas hazaar hai Telangana"
+</p>
+
 <div id="results"></div>
 
 <script>
@@ -213,7 +220,8 @@ return valid
 async function checkSchemes(){
 
 if(!validate()) return
-
+document.getElementById("results").innerHTML =
+"<div class='card'>🔎 Checking eligibility...</div>"
 let age=parseInt(document.getElementById("age").value)
 let income=parseInt(document.getElementById("income").value)
 let state=document.getElementById("state").value
@@ -236,7 +244,11 @@ displayResults(data)
 function displayResults(list){
 
 let html=""
-
+html += `
+<div class="card">
+<b>${list.length} schemes found for your profile</b>
+</div>
+`
 let age=document.getElementById("age").value
 let income=document.getElementById("income").value
 let state=document.getElementById("state").value
@@ -245,7 +257,15 @@ let aiText=generateAIExplanation(age,income,state,list)
 
 html+=`
 <div class="card" style="border:3px solid purple">
-<h3>🤖 AI Recommendation</h3>
+<h3>🤖 AI Analysis</h3>
+
+<ul style="text-align:left">
+<li>Age eligibility verified</li>
+<li>Income eligibility verified</li>
+<li>State scheme availability checked</li>
+<li>Best scheme recommended based on conditions</li>
+</ul>
+
 <p>${aiText}</p>
 </div>
 `
@@ -468,7 +488,9 @@ document.getElementById("state").value="Telangana"
 }
 
 }
-
+setTimeout(()=>{
+checkSchemes()
+},800)
 
 // ---------------- Voice output ----------------
 
