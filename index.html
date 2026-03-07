@@ -1,259 +1,280 @@
-<!DOCTYPE html>
-<html>
-
+<!DOCTYPE html><html>
 <head>
-
-<title>SchemeSense</title>
-
-<style>
-
+<title>SchemeSense – AI Government Scheme Finder</title><style>
 body{
-font-family:Arial;
-background:#f5f5f5;
-text-align:center;
-padding:40px;
+  font-family: Arial, sans-serif;
+  background:#f5f5f5;
+  text-align:center;
+  padding:40px;
+}
+
+h1{
+  margin-bottom:10px;
+}
+
+select{
+  padding:8px;
+  margin-bottom:20px;
 }
 
 input{
-padding:10px;
-margin:5px;
-width:220px;
-font-size:16px;
+  padding:10px;
+  margin:6px;
+  width:240px;
+  font-size:16px;
 }
 
 button{
-padding:10px 20px;
-background:#f39c12;
-border:none;
-color:white;
-font-size:16px;
-cursor:pointer;
-margin:5px;
+  padding:10px 20px;
+  background:#f39c12;
+  border:none;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+  margin:6px;
+  border-radius:6px;
 }
 
 .card{
-background:white;
-margin:20px auto;
-padding:20px;
-width:320px;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.2);
+  background:white;
+  margin:18px auto;
+  padding:18px;
+  width:340px;
+  border-radius:10px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.2);
 }
 
 .error{
-color:red;
-font-size:14px;
-height:16px;
+  color:red;
+  font-size:13px;
+  height:16px;
 }
 
-</style>
-
-</head>
-
-<body>
-
-<select id="language" onchange="changeLanguage()">
-<option value="en">English</option>
-<option value="te">Telugu</option>
-<option value="hi">Hindi</option>
-</select>
-
-<h1 id="title">Find Government Schemes</h1>
-
-<div>
-<input id="age" type="number" placeholder="Enter Age">
-<div id="ageError" class="error"></div>
-</div>
-
-<div>
-<input id="income" type="number" placeholder="Enter Income">
-<div id="incomeError" class="error"></div>
-</div>
-
-<div>
-<input id="state" placeholder="Enter State">
-<div id="stateError" class="error"></div>
-</div>
-
-<button onclick="checkSchemes()" id="checkBtn">Check Eligibility</button>
+</style></head><body><select id="language" onchange="changeLanguage()">
+  <option value="en">English</option>
+  <option value="te">Telugu</option>
+  <option value="hi">Hindi</option>
+</select><h1 id="title">Find Government Schemes</h1><div>
+  <input id="age" placeholder="Enter Age" oninput="monitorInputs()">
+  <div id="ageError" class="error"></div>
+</div><div>
+  <input id="income" placeholder="Enter Income" oninput="monitorInputs()">
+  <div id="incomeError" class="error"></div>
+</div><div>
+  <input id="state" placeholder="Enter State" oninput="monitorInputs()">
+  <div id="stateError" class="error"></div>
+</div><button onclick="checkSchemes()" id="checkBtn">Check Eligibility</button>
 <button onclick="startVoice()" id="voiceBtn">🎤 Speak Details</button>
 
-<div id="results"></div>
+<div id="results"></div><script>
 
-<script>
+// ---------------- API ----------------
 
 const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/prod/check-eligibility"
 
+// ---------------- Language dictionary ----------------
 
-const langText={
-
-en:{
-title:"Find Government Schemes",
-age:"Enter Age",
-income:"Enter Income",
-state:"Enter State",
-check:"Check Eligibility",
-voice:"Speak Details",
-ageError:"Enter valid age number",
-incomeError:"Enter valid income number",
-stateError:"State cannot contain numbers"
-},
-
-te:{
-title:"ప్రభుత్వ పథకాలు కనుగొనండి",
-age:"వయస్సు నమోదు చేయండి",
-income:"ఆదాయం నమోదు చేయండి",
-state:"రాష్ట్రం నమోదు చేయండి",
-check:"అర్హత తనిఖీ",
-voice:"మాట్లాడండి",
-ageError:"సరైన వయస్సు నమోదు చేయండి",
-incomeError:"సరైన ఆదాయం నమోదు చేయండి",
-stateError:"రాష్ట్రంలో సంఖ్యలు ఉండకూడదు"
-},
-
-hi:{
-title:"सरकारी योजनाएं खोजें",
-age:"आयु दर्ज करें",
-income:"आय दर्ज करें",
-state:"राज्य दर्ज करें",
-check:"योग्यता जांचें",
-voice:"बोलें",
-ageError:"सही आयु दर्ज करें",
-incomeError:"सही आय दर्ज करें",
-stateError:"राज्य में संख्या नहीं होनी चाहिए"
+const translations={
+  en:{
+    title:"Find Government Schemes",
+    age:"Enter Age",
+    income:"Enter Income",
+    state:"Enter State",
+    ageError:"Enter valid age number",
+    incomeError:"Enter valid income number",
+    stateError:"State cannot contain numbers"
+  },
+  te:{
+    title:"ప్రభుత్వ పథకాలు కనుగొనండి",
+    age:"వయస్సు నమోదు చేయండి",
+    income:"ఆదాయం నమోదు చేయండి",
+    state:"రాష్ట్రం నమోదు చేయండి",
+    ageError:"సరైన వయస్సు నమోదు చేయండి",
+    incomeError:"సరైన ఆదాయం నమోదు చేయండి",
+    stateError:"రాష్ట్రంలో సంఖ్యలు ఉండకూడదు"
+  },
+  hi:{
+    title:"सरकारी योजनाएँ खोजें",
+    age:"आयु दर्ज करें",
+    income:"आय दर्ज करें",
+    state:"राज्य दर्ज करें",
+    ageError:"सही आयु दर्ज करें",
+    incomeError:"सही आय दर्ज करें",
+    stateError:"राज्य में संख्या नहीं होनी चाहिए"
+  }
 }
 
-}
-
+// ---------------- Language change ----------------
 
 function changeLanguage(){
 
-let lang=document.getElementById("language").value
-let t=langText[lang]
+  let lang=document.getElementById("language").value
+  let t=translations[lang]
 
-document.getElementById("title").innerText=t.title
-document.getElementById("age").placeholder=t.age
-document.getElementById("income").placeholder=t.income
-document.getElementById("state").placeholder=t.state
-document.getElementById("checkBtn").innerText=t.check
-document.getElementById("voiceBtn").innerText="🎤 "+t.voice
+  document.getElementById("title").innerText=t.title
+  document.getElementById("age").placeholder=t.age
+  document.getElementById("income").placeholder=t.income
+  document.getElementById("state").placeholder=t.state
 
-document.getElementById("age").value=""
-document.getElementById("income").value=""
-document.getElementById("state").value=""
+  document.getElementById("age").value=""
+  document.getElementById("income").value=""
+  document.getElementById("state").value=""
 
-document.getElementById("results").innerHTML=""
+  document.getElementById("results").innerHTML=""
 
-clearErrors()
-
+  clearErrors()
 }
 
+// ---------------- Validation ----------------
 
 function clearErrors(){
-
-document.getElementById("ageError").innerText=""
-document.getElementById("incomeError").innerText=""
-document.getElementById("stateError").innerText=""
-
+  document.getElementById("ageError").innerText=""
+  document.getElementById("incomeError").innerText=""
+  document.getElementById("stateError").innerText=""
 }
-
 
 function validate(){
 
-clearErrors()
+  clearErrors()
 
-let lang=document.getElementById("language").value
-let t=langText[lang]
+  let lang=document.getElementById("language").value
+  let t=translations[lang]
 
-let age=document.getElementById("age").value
-let income=document.getElementById("income").value
-let state=document.getElementById("state").value
+  let age=document.getElementById("age").value
+  let income=document.getElementById("income").value
+  let state=document.getElementById("state").value
 
-let valid=true
+  let valid=true
 
-if(!age || age<=0){
+  if(!/^\d+$/.test(age)){
+    document.getElementById("ageError").innerText=t.ageError
+    valid=false
+  }
 
-document.getElementById("ageError").innerText=t.ageError
-valid=false
+  if(!/^\d+$/.test(income)){
+    document.getElementById("incomeError").innerText=t.incomeError
+    valid=false
+  }
 
+  if(/\d/.test(state)){
+    document.getElementById("stateError").innerText=t.stateError
+    valid=false
+  }
+
+  return valid
 }
 
-if(!income || income<=0){
-
-document.getElementById("incomeError").innerText=t.incomeError
-valid=false
-
-}
-
-if(/\d/.test(state)){
-
-document.getElementById("stateError").innerText=t.stateError
-valid=false
-
-}
-
-return valid
-
-}
-
+// ---------------- Fetch schemes ----------------
 
 async function checkSchemes(){
 
-if(!validate()) return
+  if(!validate()) return
 
-let age=parseInt(document.getElementById("age").value)
-let income=parseInt(document.getElementById("income").value)
-let state=document.getElementById("state").value
+  let age=parseInt(document.getElementById("age").value)
+  let income=parseInt(document.getElementById("income").value)
+  let state=document.getElementById("state").value
 
-let response=await fetch(API_URL,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({age:age,income:income,state:state})
-})
+  let response=await fetch(API_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({age:age,income:income,state:state})
+  })
 
-let data=await response.json()
+  let data=await response.json()
 
-displayResults(data)
-
+  displayResults(data)
 }
 
+// ---------------- Display schemes ----------------
 
 function displayResults(list){
 
-let html=""
+  let html=""
 
-list.forEach(s=>{
+  list.forEach(s=>{
+    html+=`
+    <div class="card">
+      <h3>${s.scheme_name}</h3>
+      <p>${s.benefits}</p>
+      <p>${s.reason}</p>
+      <a href="${s.apply_link}" target="_blank">
+        <button>Apply</button>
+      </a>
+    </div>
+    `
+  })
 
-html+=`
-<div class="card">
-<h3>${s.scheme_name}</h3>
-<p>${s.benefits}</p>
-<p>${s.reason}</p>
-<a href="${s.apply_link}" target="_blank">
-<button>Apply</button>
-</a>
-</div>
-`
-
-})
-
-document.getElementById("results").innerHTML=html
-
+  document.getElementById("results").innerHTML=html
 }
 
+// ---------------- Clear results if inputs empty ----------------
+
+function monitorInputs(){
+
+  let age=document.getElementById("age").value
+  let income=document.getElementById("income").value
+  let state=document.getElementById("state").value
+
+  if(age=="" && income=="" && state==""){
+    document.getElementById("results").innerHTML=""
+  }
+}
+
+// ---------------- Telugu numbers ----------------
+
+function teluguNumberToDigit(text){
+
+const map={
+"సున్నా":0,"ఒకటి":1,"రెండు":2,"మూడు":3,"నాలుగు":4,"ఐదు":5,
+"ఆరు":6,"ఏడు":7,"ఎనిమిది":8,"తొమ్మిది":9,"పది":10,
+"ఇరవై":20,"ముప్పై":30,"నలభై":40,"యాభై":50,"అరవై":60,
+"డెబ్బై":70,"ఎనభై":80,"తొంభై":90
+}
+
+let total=0
+text.split(" ").forEach(w=>{
+  if(map[w]!=undefined) total+=map[w]
+})
+
+return total
+}
+
+// ---------------- Hindi numbers ----------------
+
+function hindiNumberToDigit(text){
+
+const map={
+"शून्य":0,"एक":1,"दो":2,"तीन":3,"चार":4,"पांच":5,
+"छह":6,"सात":7,"आठ":8,"नौ":9,"दस":10,
+"बीस":20,"तीस":30,"चालीस":40,"पचास":50,"साठ":60,
+"सत्तर":70,"अस्सी":80,"नब्बे":90,"पैंतालीस":45
+}
+
+let total=0
+text.split(" ").forEach(w=>{
+  if(map[w]!=undefined) total+=map[w]
+})
+
+return total
+}
+
+// ---------------- Voice input ----------------
 
 function startVoice(){
 
-if(!('webkitSpeechRecognition'in window)){
-
-alert("Speech not supported")
-return
-
+if(!('webkitSpeechRecognition' in window)){
+  alert("Speech recognition not supported")
+  return
 }
 
 const recognition=new webkitSpeechRecognition()
 
-recognition.lang="en-IN"
+let lang=document.getElementById("language").value
+
+if(lang==="te") recognition.lang="te-IN"
+else if(lang==="hi") recognition.lang="hi-IN"
+else recognition.lang="en-IN"
+
 recognition.start()
 
 recognition.onresult=function(event){
@@ -263,29 +284,35 @@ let speech=event.results[0][0].transcript.toLowerCase()
 let nums=speech.match(/\d+/g)
 
 if(nums && nums.length>=2){
+  document.getElementById("age").value=nums[0]
+  document.getElementById("income").value=nums[1]
+}else{
 
-document.getElementById("age").value=nums[0]
-document.getElementById("income").value=nums[1]
+  let teluguNum=teluguNumberToDigit(speech)
+  let hindiNum=hindiNumberToDigit(speech)
+
+  if(teluguNum>0) document.getElementById("age").value=teluguNum
+  if(hindiNum>0) document.getElementById("age").value=hindiNum
+}
+
+// state detection
+if(speech.includes("andhra") || speech.includes("ఆంధ్ర") || speech.includes("आंध्र")){
+  document.getElementById("state").value="Andhra Pradesh"
+}
+
+if(speech.includes("telangana") || speech.includes("తెలంగాణ") || speech.includes("तेलंगाना")){
+  document.getElementById("state").value="Telangana"
+}
 
 }
 
-if(speech.includes("andhra"))
-document.getElementById("state").value="Andhra Pradesh"
-
-if(speech.includes("telangana"))
-document.getElementById("state").value="Telangana"
-
-if(speech.includes("tamil"))
-document.getElementById("state").value="Tamil Nadu"
-
 }
 
-}
-
-</script>
-
-</body>
+</script></body>
 </html>
+
+
+
 
 
 
