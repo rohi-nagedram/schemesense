@@ -69,7 +69,45 @@ button{
 <h1 id="title">Find Government Schemes</h1>
 
 <div>
-<input id="age" placeholder="Enter Age" oninput="monitorInputs()">
+<input id="state" list="statesList" placeholder="Enter State" oninput="monitorInputs()">
+<datalist id="statesList">
+<option value="Andhra Pradesh">
+<option value="Arunachal Pradesh">
+<option value="Assam">
+<option value="Bihar">
+<option value="Chhattisgarh">
+<option value="Goa">
+<option value="Gujarat">
+<option value="Haryana">
+<option value="Himachal Pradesh">
+<option value="Jharkhand">
+<option value="Karnataka">
+<option value="Kerala">
+<option value="Madhya Pradesh">
+<option value="Maharashtra">
+<option value="Manipur">
+<option value="Meghalaya">
+<option value="Mizoram">
+<option value="Nagaland">
+<option value="Odisha">
+<option value="Punjab">
+<option value="Rajasthan">
+<option value="Sikkim">
+<option value="Tamil Nadu">
+<option value="Telangana">
+<option value="Tripura">
+<option value="Uttar Pradesh">
+<option value="Uttarakhand">
+<option value="West Bengal">
+<option value="Delhi">
+<option value="Jammu and Kashmir">
+<option value="Ladakh">
+<option value="Chandigarh">
+<option value="Puducherry">
+<option value="Lakshadweep">
+<option value="Andaman and Nicobar Islands">
+<option value="Dadra and Nagar Haveli and Daman and Diu">
+</datalist>
 <div id="ageError" class="error"></div>
 </div>
 
@@ -98,9 +136,21 @@ Try saying:<br>
 <script>
 
 // ---------------- API ----------------
-
 const API_URL="https://965alqno7a.execute-api.us-east-1.amazonaws.com/prod/check-eligibility"
+
 let voiceMode = false
+
+const validStates = [
+"Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa",
+"Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala",
+"Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland",
+"Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura",
+"Uttar Pradesh","Uttarakhand","West Bengal","Delhi","Jammu and Kashmir",
+"Ladakh","Chandigarh","Puducherry","Lakshadweep",
+"Andaman and Nicobar Islands",
+"Dadra and Nagar Haveli and Daman and Diu"
+]
+
 
 // ---------------- Language dictionary ----------------
 
@@ -180,8 +230,6 @@ document.getElementById("incomeError").innerText=""
 document.getElementById("stateError").innerText=""
 
 }
-
-
 function validate(){
 
 clearErrors()
@@ -205,14 +253,17 @@ document.getElementById("incomeError").innerText=t.incomeError
 valid=false
 }
 
-if(/\d/.test(state)){
-document.getElementById("stateError").innerText=t.stateError
+/* replace old state validation with this */
+
+if(!validStates.includes(state)){
+document.getElementById("stateError").innerText="Enter a valid Indian state"
 valid=false
 }
 
 return valid
 
 }
+
 
 
 // ---------------- Fetch schemes ----------------
