@@ -1,0 +1,24 @@
+User (Voice / Text)
+        │
+        ▼
+Frontend Web App
+(HTML / JavaScript)
+        │
+        ▼
+Amazon API Gateway
+        │
+        ▼
+AWS Lambda
+Eligibility Logic Engine
+        │
+        ▼
+Amazon DynamoDB
+Scheme Database
+        │
+        ▼
+AI Explanation Layer
+(Prototype reasoning)
+        │
+        ▼
+Future Integration
+Amazon Bedrock
